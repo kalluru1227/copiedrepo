@@ -1,0 +1,133 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "registries_name": {
+            "defaultValue": "karnatesting",
+            "type": "String"
+        },
+        "location": {
+            "type": "String"
+        },
+        "privateEndpointName": {
+            "type": "karnaep"
+        },
+        "privateLinkResource": {
+            "type": "/subscriptions/d1e58344-b5ec-49fe-842d-a1bd158a6464/resourceGroups/ram/providers/Microsoft.ContainerRegistry/registries/clientoutreachuatacrr"
+        },
+        "targetSubResource": {
+            "type": "registry"
+        },
+        "requestMessage": {
+            "type": ""
+        },
+        "subnet": {
+            "type": "/subscriptions/d1e58344-b5ec-49fe-842d-a1bd158a6464/resourceGroups/testacr/providers/Microsoft.Network/virtualNetworks/testacrvnet/subnets/default"
+        },
+        "virtualNetworkId": {
+            "type": "/subscriptions/d1e58344-b5ec-49fe-842d-a1bd158a6464/resourceGroups/testacr/providers/Microsoft.Network/virtualNetworks/testacrvnet"
+        },
+        "virtualNetworkResourceGroup": {
+            "type": "testacr"
+        },
+        "subnetDeploymentName": {
+            "type": "UpdateSubnetDeployment-20220522214246"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.ContainerRegistry/registries",
+            "apiVersion": "2021-12-01-preview",
+            "name": "[parameters('registries_name')]",
+            "location": "australiaeast",
+            "sku": {
+                "name": "Standard",
+                "tier": "Standard"
+            },
+            "properties": {
+                "adminUserEnabled": false,
+                "policies": {
+                    "quarantinePolicy": {
+                        "status": "disabled"
+                    },
+                    "trustPolicy": {
+                        "type": "Notary",
+                        "status": "disabled"
+                    },
+                    "retentionPolicy": {
+                        "days": 7,
+                        "status": "disabled"
+                    },
+                    "exportPolicy": {
+                        "status": "enabled"
+                    }
+                },
+                "encryption": {
+                    "status": "disabled"
+                },
+                "dataEndpointEnabled": false,
+                "publicNetworkAccess": "Enabled",
+                "networkRuleBypassOptions": "AzureServices",
+                "zoneRedundancy": "Disabled",
+                "anonymousPullEnabled": false
+            }
+        },
+        {
+            "type": "Microsoft.Network/privateEndpoints",
+            "apiVersion": "2021-03-01",
+            "name": "[parameters('privateEndpointName')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [],
+            "tags": {},
+            "properties": {
+                "subnet": {
+                    "id": "[parameters('subnet')]"
+                },
+                "privateLinkServiceConnections": [
+                    {
+                        "name": "[parameters('privateEndpointName')]",
+                        "properties": {
+                            "privateLinkServiceId": "[parameters('privateLinkResource')]",
+                            "groupIds": "[parameters('targetSubResource')]"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "DnsZoneGroup-20220522214246",
+            "dependsOn": [
+                "[parameters('privateEndpointName')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                        {
+                            "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+                            "apiVersion": "2021-03-01",
+                            "name": "[concat(parameters('privateEndpointName'), '/', 'default')]",
+                            "location": "[parameters('location')]",
+                            "properties": {
+                                "privateDnsZoneConfigs": [
+                                    {
+                                        "name": "privatelink-azurecr-io",
+                                        "properties": {
+                                            "privateDnsZoneId": "/subscriptions/d1e58344-b5ec-49fe-842d-a1bd158a6464/resourceGroups/testacr/providers/Microsoft.Network/privateDnsZones/privatelink.azurecr.io"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            "resourceGroup": "pavan"
+        }
+    ]
+}
