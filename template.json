@@ -3,35 +3,34 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "registries_name": {
-            "defaultValue": "karnatesting",
             "type": "String"
         },
         "location": {
             "type": "String"
         },
         "privateEndpointName": {
-            "type": "karnaep"
+            "type": "string"
         },
         "privateLinkResource": {
-            "type": "/subscriptions/d1e58344-b5ec-49fe-842d-a1bd158a6464/resourceGroups/ram/providers/Microsoft.ContainerRegistry/registries/clientoutreachuatacrr"
+            "type": "string"
         },
         "targetSubResource": {
-            "type": "registry"
+            "type": "string"
         },
         "requestMessage": {
-            "type": ""
+            "type": "string"
         },
         "subnet": {
-            "type": "/subscriptions/d1e58344-b5ec-49fe-842d-a1bd158a6464/resourceGroups/testacr/providers/Microsoft.Network/virtualNetworks/testacrvnet/subnets/default"
+            "type": "string"
         },
         "virtualNetworkId": {
-            "type": "/subscriptions/d1e58344-b5ec-49fe-842d-a1bd158a6464/resourceGroups/testacr/providers/Microsoft.Network/virtualNetworks/testacrvnet"
+            "type": "string"
         },
         "virtualNetworkResourceGroup": {
-            "type": "testacr"
+            "type": "string"
         },
         "subnetDeploymentName": {
-            "type": "UpdateSubnetDeployment-20220522214246"
+            "type": "string"
         }
     },
     "variables": {},
@@ -40,7 +39,7 @@
             "type": "Microsoft.ContainerRegistry/registries",
             "apiVersion": "2021-12-01-preview",
             "name": "[parameters('registries_name')]",
-            "location": "australiaeast",
+            "location": "[parameters('location')]",
             "sku": {
                 "name": "Standard",
                 "tier": "Standard"
